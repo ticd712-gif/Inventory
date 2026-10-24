@@ -1,0 +1,165 @@
+<!doctype html>
+<html lang="cs">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="description" content="Dominik shop – Pokémon karty, Jumbo karty a časopisy skladem.">
+<style>html{color-scheme:dark}body{margin:0}img{max-width:100%}[hidden]{display:none!important}:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}</style>
+<title>Dominik shop</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Unbounded:wght@500;700&family=Figtree:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: compact shop header, search + category chips, responsive card grid (3:4 photo tiles), lightbox overlay */
+:root{
+  --bg:#0f121a; --surface:#171b26; --surface-2:#1d2230; --ink:#e7e9f0; --muted:#98a0b4; --line:#2a3041;
+  --accent:#8299ff; --accent-ink:#0f121a; --gold:#f0c43a; --gold-soft:#3a3115; --gold-ink:#f6dd8e; --red:#e5544b;
+  --shadow:0 1px 2px rgba(0,0,0,.3),0 10px 30px rgba(0,0,0,.3);
+  --f-display:"Unbounded",system-ui,sans-serif; --f-body:"Figtree",system-ui,-apple-system,"Segoe UI",sans-serif; --f-mono:"IBM Plex Mono",ui-monospace,Menlo,monospace;
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:15px;line-height:1.45}
+button,input{font:inherit;color:inherit}
+.wrap{max-width:1180px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+header{padding-block:28px 18px;border-bottom:1px solid var(--line);background:linear-gradient(180deg,var(--surface),var(--bg))}
+.brand{display:flex;align-items:center;gap:12px}
+.ball{width:34px;height:34px;border-radius:50%;background:linear-gradient(var(--red) 0 46%,var(--ink) 46% 54%,var(--surface) 54%);border:3px solid var(--ink);position:relative;flex:none}
+.ball::after{content:"";position:absolute;inset:50% auto auto 50%;width:10px;height:10px;transform:translate(-50%,-50%);border-radius:50%;background:var(--surface);border:3px solid var(--ink)}
+h1{font-family:var(--f-display);font-weight:700;font-size:clamp(22px,4vw,32px);letter-spacing:-.01em;margin:0;text-wrap:balance}
+.lead{color:var(--muted);margin:10px 0 0;max-width:62ch}
+.lead b{color:var(--ink);font-weight:600}
+.meta{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}
+.tag{font-size:12px;font-weight:600;padding:4px 10px;border-radius:999px;background:var(--surface-2);border:1px solid var(--line);color:var(--muted)}
+.tag b{color:var(--ink)}
+main{padding-block:18px 56px}
+.tools{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:16px}
+.search{flex:1 1 260px;position:relative;min-width:0}
+.search input{width:100%;padding:10px 12px 10px 36px;border:1px solid var(--line);border-radius:10px;background:var(--surface)}
+.search input:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.search svg{position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--muted)}
+.chips{display:flex;gap:6px;flex-wrap:wrap}
+.chip{border:1px solid var(--line);background:var(--surface);border-radius:999px;padding:6px 12px;font-size:13px;font-weight:600;cursor:pointer;color:var(--muted)}
+.chip[aria-pressed="true"]{background:var(--ink);border-color:var(--ink);color:var(--bg)}
+.chip .n{font-family:var(--f-mono);font-weight:400;opacity:.75;margin-left:4px}
+.chip:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:14px}
+@media (max-width:420px){.grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:12px;overflow:hidden;display:flex;flex-direction:column;min-width:0;text-align:left;padding:0;cursor:pointer;transition:border-color .15s,transform .15s}
+.card:hover{border-color:var(--muted)}
+@media (prefers-reduced-motion:no-preference){.card:hover{transform:translateY(-2px)}}
+.card:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.card.nophoto{cursor:default}
+.ph{aspect-ratio:3/4;background:var(--surface-2);display:grid;place-items:center;position:relative;max-width:100%;width:100%}
+.ph img{width:100%;height:100%;object-fit:cover;display:block}
+.ph .none{color:var(--muted);font-size:12px;text-align:center;display:grid;gap:8px;justify-items:center;padding:12px}
+.ph .none i{width:44px;height:60px;border:2px dashed var(--line);border-radius:6px;display:block}
+.qty{position:absolute;right:8px;top:8px;background:rgba(15,18,26,.82);color:var(--ink);font-size:12px;font-weight:700;border-radius:999px;padding:2px 9px;font-variant-numeric:tabular-nums}
+.body{padding:10px 12px 12px;display:grid;gap:3px;min-width:0}
+.nm{font-weight:600;line-height:1.3;overflow-wrap:anywhere}
+.sub{display:flex;justify-content:space-between;gap:8px;font-size:12px;color:var(--muted)}
+.id{font-family:var(--f-mono);color:var(--gold-ink)}
+.empty{padding:48px 16px;text-align:center;color:var(--muted)}
+.empty b{display:block;color:var(--ink);font-family:var(--f-display);font-weight:500;margin-bottom:6px}
+footer{border-top:1px solid var(--line);padding-block:20px 32px;color:var(--muted);font-size:13px}
+/* lightbox */
+.lb{position:fixed;inset:0;z-index:20;background:rgba(8,10,15,.92);display:grid;grid-template-rows:auto 1fr auto;padding:max(12px,env(safe-area-inset-top,0px)) max(12px,env(safe-area-inset-right,0px)) max(12px,env(safe-area-inset-bottom,0px)) max(12px,env(safe-area-inset-left,0px))}
+.lb-top{display:flex;justify-content:space-between;align-items:center;gap:12px}
+.lb-title{font-weight:600;min-width:0}
+.lb-title .id{margin-right:8px}
+.lb-img{display:grid;place-items:center;min-height:0;padding-block:10px}
+.lb-img{overflow:hidden}
+.lb-img img{max-width:100%;max-height:calc(100vh - 190px);max-height:calc(100dvh - 190px);object-fit:contain;border-radius:8px}
+.lb-nav{display:flex;justify-content:center;gap:10px}
+.lb{grid-template-rows:auto auto 1fr auto}
+.sides{display:flex;justify-content:center;gap:6px;padding-top:10px}
+.btn.sm{padding:5px 12px;font-size:13px;border-radius:999px}
+.btn[aria-pressed="true"]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.two{position:absolute;left:8px;top:8px;background:rgba(15,18,26,.82);color:var(--ink);font-size:11px;font-weight:600;border-radius:999px;padding:2px 8px}
+.btn{border:1px solid var(--line);background:var(--surface);border-radius:9px;padding:8px 14px;cursor:pointer;font-weight:600}
+.btn:hover{border-color:var(--muted)}
+.btn:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.btn[disabled]{opacity:.4;cursor:default}
+</style>
+
+</head>
+<body>
+<header>
+  <div class="wrap">
+    <div class="brand"><span class="ball" aria-hidden="true"></span><h1>Dominik shop</h1></div>
+    <p class="lead">Pokémon karty, Jumbo karty a časopisy, které mám teď skladem. Kliknutím na kartu zobrazíš velkou fotku přední i zadní strany. Máš o něco zájem? Napiš mi a uveď <b>číslo položky</b> (třeba <span class="id">#185</span>).</p>
+    <div class="meta" id="meta"></div>
+  </div>
+</header>
+<main class="wrap">
+  <div class="tools">
+    <label class="search"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+      <input id="q" type="search" placeholder="Hledat kartu, třeba Pikachu, Charizard nebo #185" aria-label="Hledat v nabídce"></label>
+  </div>
+  <div class="tools chips" id="chips"></div>
+  <div class="grid" id="grid" aria-live="polite"></div>
+</main>
+<footer><div class="wrap" id="foot"></div></footer>
+<div id="lb-root"></div>
+
+<script>
+(() => {
+const ITEMS = [{"i":"##2","n":"Kleavor VSTAR (SWSH 249) - Jumbo","k":4,"p":null,"c":"jumbo"},{"i":"##3","n":"Houndstone ex (SVP 162) - Jumbo","k":8,"p":null,"c":"jumbo"},{"i":"##4","n":"Cyclizar ex (SVP 018) - Jumbo","k":4,"p":null,"c":"jumbo"},{"i":"##5","n":"Pokémon oficiální časopis 1/2026","k":4,"p":"hh5","c":"mag","b":1},{"i":"##6","n":"Pokémon oficiální časopis 2/2026","k":11,"p":"hh6","c":"mag","b":1},{"i":"##7","n":"Pokémon oficiální časopis 3/2026","k":41,"p":"hh7","c":"mag","b":1},{"i":"##8","n":"Pokémon oficiální časopis 5/2025","k":5,"p":"hh8","c":"mag","b":1},{"i":"##9","n":"Pokémon oficiální časopis 6/2025","k":23,"p":"hh9","c":"mag","b":1},{"i":"##13","n":"Pikachu V (VIV 43) - Oversized, Jumbo, Sealed","k":295,"p":"hh13","c":"jumbo","b":1},{"i":"##14","n":"Terapagos & Friends Promo - Oversized, Jumbo, Sealed","k":6,"p":null,"c":"jumbo"},{"i":"##15","n":"Toxtricity (70) - Oversized, Jumbo, Sealed","k":39,"p":null,"c":"jumbo"},{"i":"#22","n":"Ninetales BREAK (EVO 16)","k":1,"p":null,"c":"card"},{"i":"#23","n":"Cinderace (SHF SV17)","k":1,"p":null,"c":"card"},{"i":"#26","n":"Vulpix (MEG 138)","k":1,"p":null,"c":"card"},{"i":"#27","n":"Watchog (CRI 097)","k":1,"p":null,"c":"card"},{"i":"#28","n":"Meowth ex (POR 107)","k":1,"p":null,"c":"card"},{"i":"#29","n":"Ethan's Ho-Oh ex (DRI 239)","k":1,"p":null,"c":"card"},{"i":"#31","n":"Iono's Bellibolt ex (JTG 172)","k":1,"p":null,"c":"card"},{"i":"#32","n":"Appletun (SSP 211)","k":1,"p":null,"c":"card"},{"i":"#33","n":"Ralts (PAF 153)","k":1,"p":null,"c":"card"},{"i":"#34","n":"Mewtwo (DET 12)","k":1,"p":null,"c":"card"},{"i":"#37","n":"Frogadier (CRI 089)","k":1,"p":null,"c":"card"},{"i":"#38","n":"Cynthia's Garchomp ex (SVP 204)","k":1,"p":null,"c":"card"},{"i":"#39","n":"Exeggutor (MEG 135)","k":1,"p":null,"c":"card"},{"i":"#40","n":"Greninja BREAK (BKP 41)","k":1,"p":null,"c":"card"},{"i":"#41","n":"Giratina V (LOR 130)","k":1,"p":null,"c":"card"},{"i":"#44","n":"Chien-Pao ex (PAL 274)","k":1,"p":null,"c":"card"},{"i":"#46","n":"Blaziken (DRI 192)","k":1,"p":null,"c":"card"},{"i":"#49","n":"Arcanine (DET 6)","k":1,"p":null,"c":"card"},{"i":"#52","n":"Metagross V (CRE 112) - DE","k":1,"p":null,"c":"card"},{"i":"#53","n":"Blastoise V (SWSH 101)","k":1,"p":null,"c":"card"},{"i":"#55","n":"Shaymin (DRI 185)","k":1,"p":null,"c":"card"},{"i":"#57","n":"Mega Starmie ex (POR 118)","k":1,"p":null,"c":"card"},{"i":"#59","n":"Mewtwo V (SWSH 223)","k":1,"p":null,"c":"card"},{"i":"#62","n":"Pikachu (SLG 28) - Reverse Holo","k":1,"p":null,"c":"card"},{"i":"#71","n":"Mega Hawlucha ex (ASC 268)","k":1,"p":null,"c":"card"},{"i":"#74","n":"Manectric (PBL 089)","k":1,"p":null,"c":"card"},{"i":"#75","n":"Ampharos (CRI 090)","k":1,"p":null,"c":"card"},{"i":"#76","n":"Mega Greninja ex (CRI 100)","k":1,"p":null,"c":"card"},{"i":"#77","n":"Mega Lucario ex (MEP 033)","k":1,"p":null,"c":"card"},{"i":"#79","n":"Mawile (ASC 246)","k":1,"p":null,"c":"card"},{"i":"#80","n":"Crabominable (SCR 149) - Snowflake stamped","k":1,"p":null,"c":"card"},{"i":"#81","n":"Vikavolt (ASC 230)","k":1,"p":null,"c":"card"},{"i":"#82","n":"Pikachu (SLG 28) - Reverse Holo","k":1,"p":null,"c":"card"},{"i":"#91","n":"Pawmot ex (OBF 073) - Sealed","k":1,"p":null,"c":"sealed"},{"i":"#93","n":"Maushold ex (PAR 155) - Sealed","k":1,"p":null,"c":"sealed"},{"i":"#94","n":"Celebrations Special Collection: Pikachu V-UNION","k":1,"p":null,"c":"card"},{"i":"#95","n":"Eevee (MEW 133) - Snowflake stamped - Sealed","k":1,"p":null,"c":"sealed"},{"i":"#96","n":"Articuno (xJTG 032) - Snowflake stamped - Sealed","k":1,"p":null,"c":"sealed"},{"i":"#97","n":"Delibird (PAL 046) - Snowflake stamped - Sealed","k":1,"p":null,"c":"sealed"},{"i":"#98","n":"Cryogonal (SSP 047) - Snowflake stamped - Sealed","k":1,"p":null,"c":"sealed"},{"i":"#99","n":"Dewgong (PFL 097)","k":1,"p":null,"c":"card"},{"i":"#100","n":"Watchog (CRI 097)","k":1,"p":null,"c":"card"},{"i":"#101","n":"Misty's Psyduck (DRI 193)","k":1,"p":null,"c":"card"},{"i":"#103","n":"MRayquaza EX (ROS 76)","k":1,"p":null,"c":"card"},{"i":"#104","n":"Venusaur ex (SCR 001)","k":1,"p":null,"c":"card"},{"i":"#109","n":"Eevee (WP 11)","k":1,"p":null,"c":"card"},{"i":"#110","n":"Eevee GX (SM 233)","k":1,"p":null,"c":"card"},{"i":"#111","n":"Dark Alakazam (TR 1) - IT","k":1,"p":null,"c":"card"},{"i":"#112","n":"Abra Lv.8 (MT 69)","k":1,"p":null,"c":"card"},{"i":"#113","n":"Mew (CRZ GG10)","k":1,"p":null,"c":"card"},{"i":"#115","n":"Pikachu (MEP 093) - Sealed","k":1,"p":"h115","c":"sealed","b":1},{"i":"#116","n":"Pikachu (MEP 093) - Sealed","k":1,"p":"h116","c":"sealed","b":1},{"i":"#123","n":"Glaceon VMAX (EVS 041) - Sealed","k":1,"p":"h123","c":"sealed","b":1},{"i":"#124","n":"Glaceon V (EVS 040) - Sealed","k":1,"p":"h124","c":"sealed","b":1},{"i":"#125","n":"Alolan Vulpix V (SIT 033) - Sealed","k":1,"p":"h125","c":"sealed","b":1},{"i":"#127","n":"Crabominable (SCR 149) - Sealed","k":1,"p":"h127","c":"sealed","b":1},{"i":"#128","n":"Eiscue ex (OBF 042) - Sealed","k":1,"p":"h128","c":"sealed","b":1},{"i":"#129","n":"Eiscue ex (OBF 042) - Sealed","k":1,"p":"h129","c":"sealed","b":1},{"i":"#130","n":"Vanilluxe (PAR 045) - Sealed","k":1,"p":"h130","c":"sealed","b":1},{"i":"#131","n":"Vanilluxe (PAR 045) - Sealed","k":1,"p":"h131","c":"sealed","b":1},{"i":"#132","n":"Articuno (xJTG 032) - Sealed","k":1,"p":"h132","c":"sealed","b":1},{"i":"#133","n":"Snorunt (PAR 037) - Sealed","k":1,"p":"h133","c":"sealed","b":1},{"i":"#134","n":"Snorunt (PAR 037) - Sealed","k":1,"p":"h134","c":"sealed","b":1},{"i":"#135","n":"Frigibax (PAL 058) - Sealed","k":1,"p":"h135","c":"sealed","b":1},{"i":"#137","n":"Iron Bundle (TWM 062) - Sealed","k":1,"p":"h137","c":"sealed","b":1},{"i":"#138","n":"Iron Bundle (TWM 062) - Sealed","k":1,"p":"h138","c":"sealed","b":1},{"i":"#139","n":"Cetoddle (PAL 053) - Sealed","k":1,"p":"h139","c":"sealed","b":1},{"i":"#140","n":"Cetoddle (PAL 053) - Sealed","k":1,"p":"h140","c":"sealed","b":1},{"i":"#141","n":"Chien-Pao ex (PAL 061) - Sealed","k":1,"p":"h141","c":"sealed","b":1},{"i":"#143","n":"Delibird (PAL 046) - Sealed","k":1,"p":"h143","c":"sealed","b":1},{"i":"#145","n":"Cryogonal (EVS 043) - Sealed","k":1,"p":"h145","c":"sealed","b":1},{"i":"#146","n":"Glastrier (LOR 051) - Sealed","k":1,"p":"h146","c":"sealed","b":1},{"i":"#147","n":"Snom (FST 084) - Sealed","k":1,"p":"h147","c":"sealed","b":1},{"i":"#156","n":"Flying Pikachu VMAX (CEL 007)","k":1,"p":"h156","c":"card","b":1},{"i":"#158","n":"Pikachu (CEL 005)","k":1,"p":"h158","c":"card","b":1},{"i":"#159","n":"Pikachu (CEL 005)","k":1,"p":"h159","c":"card","b":1},{"i":"#160","n":"Pikachu (CEL 005)","k":1,"p":"h160","c":"card","b":1},{"i":"#165","n":"Armored Mewtwo (SM 228)","k":1,"p":"h165","c":"card","b":1},{"i":"#166","n":"Mewtwo LV.X (DPPR 28)","k":1,"p":"h166","c":"card","b":1},{"i":"#167","n":"Aurorus (FLI 28)","k":1,"p":null,"c":"card"},{"i":"#169","n":"Leafeon (BW 87)","k":1,"p":null,"c":"card"},{"i":"#170","n":"Bulbasaur (MEG 133)","k":1,"p":"h170","c":"card","b":1},{"i":"#171","n":"Cleffa (OBF 202)","k":1,"p":"h171","c":"card","b":1},{"i":"#172","n":"Charmander (PKMTCH SV-P 242)","k":1,"p":"h172","c":"card","b":1},{"i":"#173","n":"Snorlax (UNB 158)","k":1,"p":"h173","c":"card","b":1},{"i":"#181","n":"Delibird (PAL 046) - Sealed","k":1,"p":"h181","c":"sealed","b":1},{"i":"#182","n":"Delibird (PAL 046) - Sealed","k":1,"p":"h182","c":"sealed","b":1},{"i":"#184","n":"Pikachu (MEW 025) - Sealed","k":1,"p":"h184","c":"sealed","b":1},{"i":"#186","n":"Eevee (MEW 133) - Sealed","k":1,"p":"h186","c":"sealed","b":1},{"i":"#187","n":"Eevee (MEW 133) - Sealed","k":1,"p":"h187","c":"sealed","b":1},{"i":"#188","n":"Crabominable (SCR 149) - Sealed","k":1,"p":"h188","c":"sealed","b":1},{"i":"#189","n":"Crabominable (SCR 149) - Sealed","k":1,"p":"h189","c":"sealed","b":1},{"i":"#190","n":"Vanillish (PAR 190) - Sealed","k":1,"p":"h190","c":"sealed","b":1},{"i":"#191","n":"Vanillish (PAR 190) - Sealed","k":1,"p":"h191","c":"sealed","b":1},{"i":"#192","n":"Glaceon ex (xPRE 026) - Sealed","k":1,"p":"h192","c":"sealed","b":1},{"i":"#193","n":"Glaceon ex (xPRE 026) - Sealed","k":1,"p":"h193","c":"sealed","b":1},{"i":"#194","n":"Articuno (xJTG 032) - Sealed","k":1,"p":"h194","c":"sealed","b":1},{"i":"#195","n":"Articuno (xJTG 032) - Sealed","k":1,"p":"h195","c":"sealed","b":1},{"i":"#196","n":"Cryogonal (SSP 047) - Sealed","k":1,"p":"h196","c":"sealed","b":1},{"i":"#197","n":"Cryogonal (SSP 047) - Sealed","k":1,"p":null,"c":"sealed"},{"i":"#199","n":"Blastoise & Piplup GX (CEC 38)","k":1,"p":"h199","c":"card","b":1},{"i":"#201","n":"Pikachu (MCD16 6)","k":1,"p":"h201","c":"card","b":1},{"i":"#208","n":"Pikachu (TK4 R16)","k":1,"p":"h208","c":"card","b":1},{"i":"#213","n":"Victini (SVP 208)","k":1,"p":"h213","c":"card","b":1},{"i":"#215","n":"Pikachu (MEP 093) - Winner Stamp","k":1,"p":"h215","c":"card","b":1},{"i":"#216","n":"Pikachu (MEP 093) - Winner Stamp","k":1,"p":"h216","c":"card","b":1},{"i":"#217","n":"Pikachu (MEP 093) - Sealed","k":1,"p":"h217","c":"sealed","b":1},{"i":"#218","n":"Pikachu (MEP 093) - Sealed","k":1,"p":"h218","c":"sealed","b":1},{"i":"#219","n":"Pikachu (MEP 093) - Sealed","k":1,"p":"h219","c":"sealed","b":1},{"i":"#220","n":"Charizard VMAX (SHF SV107)","k":1,"p":"h220","c":"card","b":1},{"i":"#221","n":"Pikachu V (LOR TG16)","k":1,"p":"h221","c":"card","b":1},{"i":"#223","n":"Magikarp & Wailord GX (SM 166)","k":1,"p":"h223","c":"card","b":1},{"i":"#224","n":"Muk & Alolan Muk GX (UNB 196)","k":1,"p":"h224","c":"card","b":1},{"i":"#225","n":"Latias & Latios GX (TEU 113)","k":1,"p":"h225","c":"card","b":1},{"i":"#226","n":"Magikarp & Wailord GX (TEU 160)","k":1,"p":"h226","c":"card","b":1},{"i":"#227","n":"Charizard & Braixen GX (CEC 22)","k":1,"p":"h227","c":"card","b":1},{"i":"#228","n":"Mega Lopunny & Jigglypuff GX (CEC 165)","k":1,"p":"h228","c":"card","b":1},{"i":"#229","n":"Arceus & Dialga & Palkia GX (CEC 220)","k":1,"p":"h229","c":"card","b":1},{"i":"#230","n":"Charizard ex (OBF 223)","k":1,"p":"h230","c":"card","b":1},{"i":"#231","n":"Charizard ex (OBF 223)","k":1,"p":"h231","c":"card","b":1},{"i":"#232","n":"Charizard VSTAR (SWSH 262)","k":1,"p":"h232","c":"card","b":1},{"i":"#233","n":"Charizard VSTAR (SWSH 262)","k":1,"p":"h233","c":"card","b":1},{"i":"#234","n":"Charizard V (SWSH 260)","k":1,"p":"h234","c":"card","b":1},{"i":"#235","n":"Charizard V (SWSH 260)","k":1,"p":"h235","c":"card","b":1},{"i":"#236","n":"Charizard VMAX (SWSH 261)","k":1,"p":"h236","c":"card","b":1},{"i":"#237","n":"Charizard [G] LV.X (DPPR 45)","k":1,"p":"h237","c":"card","b":1}];
+const UPDATED = '24. 10. 2026';
+const CATS = [['all','Vše'],['card','Karty'],['sealed','Sealed promo'],['jumbo','Jumbo'],['mag','Časopisy']];
+const $ = s => document.querySelector(s);
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const norm = s => String(s||'').normalize('NFD').replace(/[̀-ͯ]/g,'').toLowerCase();
+const ks = n => n + ' ks';
+let cat = 'all', shown = [];
+const pieces = ITEMS.reduce((a,i)=>a+i.k,0);
+$('#meta').innerHTML = `<span class="tag"><b>${ITEMS.length}</b> položek</span><span class="tag"><b>${pieces.toLocaleString('cs-CZ')}</b> kusů</span><span class="tag">Aktualizováno ${esc(UPDATED)}</span>`;
+$('#foot').textContent = `Nabídka platí ke dni ${UPDATED}. Co se mezitím prodalo, už nemusí být k mání, napiš mi a ověřím to.`;
+function render(){
+  const t = norm($('#q').value.trim());
+  $('#chips').innerHTML = CATS.map(([k,l])=>{ const n = k==='all' ? ITEMS.length : ITEMS.filter(i=>i.c===k).length; return n ? `<button class="chip" data-c="${k}" aria-pressed="${cat===k}">${l}<span class="n">${n}</span></button>` : ''; }).join('');
+  shown = ITEMS.filter(i => (cat==='all' || i.c===cat) && (!t || norm(i.n).includes(t) || norm(i.i).includes(t)));
+  $('#grid').innerHTML = shown.length ? shown.map((i,k)=>`
+    <${i.p?'button type="button"':'div'} class="card${i.p?'':' nophoto'}" ${i.p?`data-k="${k}" aria-label="Zobrazit fotku: ${esc(i.n)}"`:''}>
+      <div class="ph">${i.p ? `<img src="img/${i.p}-t.jpg" alt="${esc(i.n)}" loading="lazy" width="315" height="420">` : '<div class="none"><i></i>Fotka bude brzy přidána</div>'}${i.k>1?`<span class="qty">${ks(i.k)}</span>`:''}${i.b?'<span class="two">obě strany</span>':''}</div>
+      <div class="body"><div class="nm">${esc(i.n)}</div><div class="sub"><span class="id">${esc(i.i)}</span><span>${ks(i.k)}</span></div></div>
+    </${i.p?'button':'div'}>`).join('') : '<div class="empty" style="grid-column:1/-1"><b>Nic nenalezeno</b>Zkus jiný název nebo kategorii.</div>';
+}
+$('#q').addEventListener('input', render);
+$('#chips').addEventListener('click', e=>{ const b=e.target.closest('[data-c]'); if(b){ cat=b.dataset.c; render(); } });
+/* lightbox over the photographed items currently shown */
+let lbList = [], lbIdx = 0, lbSide = 'f', lastFocus = null;
+function lbShow(){
+  const i = lbList[lbIdx];
+  $('#lb-root').innerHTML = `<div class="lb" role="dialog" aria-modal="true" aria-label="${esc(i.n)}">
+    <div class="lb-top"><div class="lb-title"><span class="id">${esc(i.i)}</span>${esc(i.n)} · ${ks(i.k)}</div><button class="btn" data-lb="close" type="button">Zavřít</button></div>
+    ${i.b?`<div class="sides" role="group" aria-label="Strana"><button type="button" class="btn sm" data-side="f" aria-pressed="${lbSide==='f'}">Přední strana</button><button type="button" class="btn sm" data-side="b" aria-pressed="${lbSide==='b'}">Zadní strana</button></div>`:''}
+    <div class="lb-img"><img src="img/${i.p}${i.b&&lbSide==='b'?'-b':''}.jpg" alt="${esc(i.n)} – ${i.b&&lbSide==='b'?'zadní':'přední'} strana"></div>
+    <div class="lb-nav"><button class="btn" data-lb="prev" type="button" ${lbIdx===0?'disabled':''}>‹ Předchozí</button><span style="align-self:center;color:var(--muted);font-size:13px">${lbIdx+1} / ${lbList.length}</span><button class="btn" data-lb="next" type="button" ${lbIdx===lbList.length-1?'disabled':''}>Další ›</button></div>
+  </div>`;
+  $('#lb-root .lb [data-lb="close"]').focus();
+}
+function lbClose(){ $('#lb-root').innerHTML=''; if (lastFocus) lastFocus.focus(); }
+$('#grid').addEventListener('click', e=>{
+  const c = e.target.closest('[data-k]'); if (!c) return;
+  lastFocus = c; const it = shown[+c.dataset.k];
+  lbList = shown.filter(i=>i.p); lbIdx = lbList.indexOf(it); lbSide = 'f'; lbShow();
+});
+$('#lb-root').addEventListener('click', e=>{
+  const sd = e.target.closest('[data-side]'); if (sd){ lbSide = sd.dataset.side; lbShow(); return; }
+  const b = e.target.closest('[data-lb]');
+  if (b){ const a=b.dataset.lb; if (a==='close') lbClose(); else if (a==='prev' && lbIdx>0){ lbIdx--; lbShow(); } else if (a==='next' && lbIdx<lbList.length-1){ lbIdx++; lbShow(); } return; }
+  if (e.target.classList.contains('lb') || e.target.classList.contains('lb-img')) lbClose();
+});
+document.addEventListener('keydown', e=>{
+  if (!$('#lb-root').innerHTML) return;
+  if (e.key==='Escape') lbClose();
+  else if ((e.key==='f'||e.key==='F'||e.key===' ') && lbList[lbIdx] && lbList[lbIdx].b){ e.preventDefault(); lbSide = lbSide==='f'?'b':'f'; lbShow(); }
+  else if (e.key==='ArrowLeft' && lbIdx>0){ lbIdx--; lbShow(); }
+  else if (e.key==='ArrowRight' && lbIdx<lbList.length-1){ lbIdx++; lbShow(); }
+});
+render();
+})();
+</script>
+
+</body>
+</html>
