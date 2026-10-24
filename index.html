@@ -76,6 +76,8 @@ footer{border-top:1px solid var(--line);padding-block:20px 32px;color:var(--mute
 .lb-img{overflow:hidden}
 .lb-img img{max-width:100%;max-height:calc(100vh - 190px);max-height:calc(100dvh - 190px);object-fit:contain;border-radius:8px}
 .lb-nav{display:flex;justify-content:center;gap:10px}
+.lb-acts{display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end}
+.card.flash{outline:3px solid var(--gold);outline-offset:3px}
 .lb{grid-template-rows:auto auto 1fr auto}
 .sides{display:flex;justify-content:center;gap:6px;padding-top:10px}
 .btn.sm{padding:5px 12px;font-size:13px;border-radius:999px}
@@ -121,6 +123,14 @@ const $ = s => document.querySelector(s);
 const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const norm = s => String(s||'').normalize('NFD').replace(/[̀-ͯ]/g,'').toLowerCase();
 const ks = n => n + ' ks';
+const SHOP_URL = 'https://ticd712-gif.github.io/Inventory/';
+const slug = i => i.i.replace(/#/g,'h');
+function copyText(t, btn){
+  const done = () => { const o = btn.textContent; btn.textContent = 'Zkopírováno'; setTimeout(()=>btn.textContent=o, 1600); };
+  if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(t).then(done, ()=>fallback());
+  else fallback();
+  function fallback(){ const ta=document.createElement('textarea'); ta.value=t; ta.setAttribute('readonly',''); ta.style.position='fixed'; ta.style.opacity='0'; document.body.appendChild(ta); ta.select(); try{ document.execCommand('copy'); done(); }catch(e){} ta.remove(); }
+}
 let cat = 'all', shown = [];
 const pieces = ITEMS.reduce((a,i)=>a+i.k,0);
 $('#meta').innerHTML = `<span class="tag"><b>${ITEMS.length}</b> položek</span><span class="tag"><b>${pieces.toLocaleString('cs-CZ')}</b> kusů</span><span class="tag">Aktualizováno ${esc(UPDATED)}</span>`;
@@ -130,7 +140,7 @@ function render(){
   $('#chips').innerHTML = CATS.map(([k,l])=>{ const n = k==='all' ? ITEMS.length : ITEMS.filter(i=>i.c===k).length; return n ? `<button class="chip" data-c="${k}" aria-pressed="${cat===k}">${l}<span class="n">${n}</span></button>` : ''; }).join('');
   shown = ITEMS.filter(i => (cat==='all' || i.c===cat) && (!t || norm(i.n).includes(t) || norm(i.i).includes(t)));
   $('#grid').innerHTML = shown.length ? shown.map((i,k)=>`
-    <${i.p?'button type="button"':'div'} class="card${i.p?'':' nophoto'}" ${i.p?`data-k="${k}" aria-label="Zobrazit fotku: ${esc(i.n)}"`:''}>
+    <${i.p?'button type="button"':'div'} id="${slug(i)}" class="card${i.p?'':' nophoto'}" ${i.p?`data-k="${k}" aria-label="Zobrazit fotku: ${esc(i.n)}"`:''}>
       <div class="ph">${i.p ? `<img src="img/${i.p}-t.jpg" alt="${esc(i.n)}" loading="lazy" width="315" height="420">` : '<div class="none"><i></i>Fotka bude brzy přidána</div>'}${i.k>1?`<span class="qty">${ks(i.k)}</span>`:''}${i.b?'<span class="two">obě strany</span>':''}</div>
       <div class="body"><div class="nm">${esc(i.n)}</div><div class="sub"><span class="id">${esc(i.i)}</span><span>${ks(i.k)}</span></div></div>
     </${i.p?'button':'div'}>`).join('') : '<div class="empty" style="grid-column:1/-1"><b>Nic nenalezeno</b>Zkus jiný název nebo kategorii.</div>';
@@ -142,14 +152,14 @@ let lbList = [], lbIdx = 0, lbSide = 'f', lastFocus = null;
 function lbShow(){
   const i = lbList[lbIdx];
   $('#lb-root').innerHTML = `<div class="lb" role="dialog" aria-modal="true" aria-label="${esc(i.n)}">
-    <div class="lb-top"><div class="lb-title"><span class="id">${esc(i.i)}</span>${esc(i.n)} · ${ks(i.k)}</div><button class="btn" data-lb="close" type="button">Zavřít</button></div>
+    <div class="lb-top"><div class="lb-title"><span class="id">${esc(i.i)}</span>${esc(i.n)} · ${ks(i.k)}</div><div class="lb-acts"><button class="btn" data-lb="link" type="button" title="Zkopírovat odkaz na tuhle kartu">Kopírovat odkaz</button><button class="btn" data-lb="close" type="button">Zavřít</button></div></div>
     ${i.b?`<div class="sides" role="group" aria-label="Strana"><button type="button" class="btn sm" data-side="f" aria-pressed="${lbSide==='f'}">Přední strana</button><button type="button" class="btn sm" data-side="b" aria-pressed="${lbSide==='b'}">Zadní strana</button></div>`:''}
     <div class="lb-img"><img src="img/${i.p}${i.b&&lbSide==='b'?'-b':''}.jpg" alt="${esc(i.n)} – ${i.b&&lbSide==='b'?'zadní':'přední'} strana"></div>
     <div class="lb-nav"><button class="btn" data-lb="prev" type="button" ${lbIdx===0?'disabled':''}>‹ Předchozí</button><span style="align-self:center;color:var(--muted);font-size:13px">${lbIdx+1} / ${lbList.length}</span><button class="btn" data-lb="next" type="button" ${lbIdx===lbList.length-1?'disabled':''}>Další ›</button></div>
   </div>`;
   $('#lb-root .lb [data-lb="close"]').focus();
 }
-function lbClose(){ $('#lb-root').innerHTML=''; if (lastFocus) lastFocus.focus(); }
+function lbClose(){ $('#lb-root').innerHTML=''; if (lastFocus) lastFocus.focus(); try{ if (location.hash) history.replaceState(null,'',location.pathname+location.search); }catch(e){} }
 $('#grid').addEventListener('click', e=>{
   const c = e.target.closest('[data-k]'); if (!c) return;
   lastFocus = c; const it = shown[+c.dataset.k];
@@ -158,7 +168,7 @@ $('#grid').addEventListener('click', e=>{
 $('#lb-root').addEventListener('click', e=>{
   const sd = e.target.closest('[data-side]'); if (sd){ lbSide = sd.dataset.side; lbShow(); return; }
   const b = e.target.closest('[data-lb]');
-  if (b){ const a=b.dataset.lb; if (a==='close') lbClose(); else if (a==='prev' && lbIdx>0){ lbIdx--; lbShow(); } else if (a==='next' && lbIdx<lbList.length-1){ lbIdx++; lbShow(); } return; }
+  if (b){ const a=b.dataset.lb; if (a==='link'){ copyText(SHOP_URL+'#'+slug(lbList[lbIdx]), b); return; } if (a==='close') lbClose(); else if (a==='prev' && lbIdx>0){ lbIdx--; lbShow(); } else if (a==='next' && lbIdx<lbList.length-1){ lbIdx++; lbShow(); } return; }
   if (e.target.classList.contains('lb') || e.target.classList.contains('lb-img')) lbClose();
 });
 document.addEventListener('keydown', e=>{
@@ -169,6 +179,17 @@ document.addEventListener('keydown', e=>{
   else if (e.key==='ArrowRight' && lbIdx<lbList.length-1){ lbIdx++; lbShow(); }
 });
 render();
+/* open the card named in the link, e.g. …/Inventory/#h185 */
+function openFromHash(){
+  const h = decodeURIComponent((location.hash||'').slice(1)); if (!h) return;
+  const it = ITEMS.find(i=>slug(i)===h); if (!it) return;
+  cat = 'all'; $('#q').value = ''; render();
+  const el = document.getElementById(h); if (!el) return;
+  el.scrollIntoView({block:'center'});
+  if (it.p){ lastFocus = el; lbList = shown.filter(i=>i.p); lbIdx = lbList.indexOf(it); lbSide = 'f'; lbShow(); }
+  else { el.classList.add('flash'); setTimeout(()=>el.classList.remove('flash'), 2400); }
+}
+openFromHash(); window.addEventListener('hashchange', openFromHash);
 })();
 </script>
 
