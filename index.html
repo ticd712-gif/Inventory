@@ -132,6 +132,7 @@ const norm = s => String(s||'').normalize('NFD').replace(/[̀-ͯ]/g,'').toLowerC
 const ks = n => n + ' ks';
 const SHOP_URL = 'https://ticd712-gif.github.io/Inventory/';
 const slug = i => i.i.replace(/#/g,'h');
+const TH = /github\.io$/.test(location.hostname) ? '-t' : '';
 function copyText(t, btn){
   const done = () => { const o = btn.textContent; btn.textContent = 'Zkopírováno'; setTimeout(()=>btn.textContent=o, 1600); };
   if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(t).then(done, ()=>fallback());
@@ -148,7 +149,7 @@ function render(){
   shown = ITEMS.filter(i => (cat==='all' || i.c===cat || (cat==='aukro' && i.a)) && (!t || norm(i.n).includes(t) || norm(i.i).includes(t)));
   $('#grid').innerHTML = shown.length ? shown.map((i,k)=>`<div class="cell">
     <${i.p?'button type="button"':'div'} id="${slug(i)}" class="card${i.p?'':' nophoto'}" ${i.p?`data-k="${k}" aria-label="Zobrazit fotku: ${esc(i.n)}"`:''}>
-      <div class="ph">${i.p ? `<img src="img/${i.p}-t.jpg" alt="${esc(i.n)}" loading="lazy" width="315" height="420">` : '<div class="none"><i></i>Fotka bude brzy přidána</div>'}${i.k>1?`<span class="qty">${ks(i.k)}</span>`:''}${i.b?'<span class="two">obě strany</span>':''}${i.a?'<span class="onauk">Aukce</span>':''}</div>
+      <div class="ph">${i.p ? `<img src="img/${i.p}${TH}.jpg" alt="${esc(i.n)}" loading="lazy" width="315" height="420">` : '<div class="none"><i></i>Fotka bude brzy přidána</div>'}${i.k>1?`<span class="qty">${ks(i.k)}</span>`:''}${i.b?'<span class="two">obě strany</span>':''}${i.a?'<span class="onauk">Aukce</span>':''}</div>
       <div class="body"><div class="nm">${esc(i.n)}</div><div class="sub"><span class="id">${esc(i.i)}</span><span>${ks(i.k)}</span></div></div>
     </${i.p?'button':'div'}>${i.a?`<a class="auk" href="${esc(i.a)}" target="_blank" rel="noopener">Přihodit na Aukru ↗</a>`:''}</div>`).join('') : '<div class="empty" style="grid-column:1/-1"><b>Nic nenalezeno</b>Zkus jiný název nebo kategorii.</div>';
 }
