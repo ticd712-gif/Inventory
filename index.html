@@ -1,5 +1,12 @@
+<!doctype html>
+<html lang="cs">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="description" content="Dominik shop – Pokémon karty, Jumbo karty a časopisy skladem.">
+<link rel="icon" type="image/png" href="img/logo.png">
+<style>html{color-scheme:dark}body{margin:0}img{max-width:100%}[hidden]{display:none!important}:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}</style>
 <title>Dominik shop</title>
-<meta name="claude:viewport-fit-sides" content="cover">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Unbounded:wght@500;700&family=Figtree:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap">
 <style>
@@ -17,8 +24,8 @@ button,input{font:inherit;color:inherit}
 .wrap{max-width:1180px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
 header{padding-block:28px 18px;border-bottom:1px solid var(--line);background:linear-gradient(180deg,var(--surface),var(--bg))}
 .brand{display:flex;align-items:center;gap:12px}
-.ball{width:34px;height:34px;border-radius:50%;background:linear-gradient(var(--red) 0 46%,var(--ink) 46% 54%,var(--surface) 54%);border:3px solid var(--ink);position:relative;flex:none}
-.ball::after{content:"";position:absolute;inset:50% auto auto 50%;width:10px;height:10px;transform:translate(-50%,-50%);border-radius:50%;background:var(--surface);border:3px solid var(--ink)}
+.logo{width:72px;height:72px;border-radius:50%;flex:none;display:block;box-shadow:0 2px 10px rgba(0,0,0,.35)}
+@media (max-width:520px){.logo{width:56px;height:56px}}
 h1{font-family:var(--f-display);font-weight:700;font-size:clamp(22px,4vw,32px);letter-spacing:-.01em;margin:0;text-wrap:balance}
 .lead{color:var(--muted);margin:10px 0 0;max-width:62ch}
 .lead b{color:var(--ink);font-weight:600}
@@ -90,9 +97,11 @@ footer{border-top:1px solid var(--line);padding-block:20px 32px;color:var(--mute
 .btn[disabled]{opacity:.4;cursor:default}
 </style>
 
+</head>
+<body>
 <header>
   <div class="wrap">
-    <div class="brand"><span class="ball" aria-hidden="true"></span><h1>Dominik shop</h1></div>
+    <div class="brand"><img class="logo" src="img/logo.png" alt="" width="72" height="72"><h1>Dominik shop</h1></div>
     <p class="lead">Pokémon karty, Jumbo karty a časopisy, které mám teď skladem. Kliknutím na kartu zobrazíš velkou fotku přední i zadní strany. Máš o něco zájem? Napiš mi a uveď <b>číslo položky</b> (třeba <span class="id">#185</span>).</p>
     <nav class="contact" aria-label="Kde mě najdeš">
       <a class="cbtn aukro" href="https://aukro.cz/uzivatel/Dominik_shop/nabidky" target="_blank" rel="noopener">Aukro<span>Dominik_shop</span></a>
